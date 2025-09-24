@@ -37,6 +37,7 @@ public class JwtUtils {
     public String getUsernameFromToken(String token) {
         Claims claims = Jwts.parser()
                 .setSigningKey(getSigningKey())
+                .build()
                 .parseClaimsJws(token)
                 .getBody();
         
@@ -47,6 +48,7 @@ public class JwtUtils {
         try {
             Jwts.parser()
                 .setSigningKey(getSigningKey())
+                .build()
                 .parseClaimsJws(token);
             return true;
         } catch (SecurityException ex) {

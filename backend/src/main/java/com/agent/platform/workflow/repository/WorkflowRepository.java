@@ -23,15 +23,19 @@ public interface WorkflowRepository extends JpaRepository<Workflow, Long> {
     // 根据分类查找工作流
     Page<Workflow> findByUserIdAndCategoryOrderByUpdatedAtDesc(Long userId, String category, Pageable pageable);
     
+    // 检查名称唯一性
+    boolean existsByUserIdAndName(Long userId, String name);
+    
+    // 检查名称唯一性（排除指定ID）
+    boolean existsByUserIdAndNameAndIdNot(Long userId, String name, Long id);
+    
     // 搜索工作流（按名称和描述）
-    @Query("SELECT w FROM Workflow w WHERE w.userId = :userId AND " +
+    @Query("SELECT w FROM Workflow w WHERE w.user.id = :userId AND " +
            "(LOWER(w.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "LOWER(w.description) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Workflow> searchByKeyword(@Param("userId") Long userId, @Param("keyword") String keyword, Pageable pageable);
     
-    // 根据标签查找工作流
-    @Query("SELECT w FROM Workflow w WHERE w.userId = :userId AND :tag = ANY(w.tags)")
-    Page<Workflow> findByUserIdAndTag(@Param("userId") Long userId, @Param("tag") String tag, Pageable pageable);
+
     
     // 查找模板工作流
     Page<Workflow> findByIsTemplateTrueOrderByUpdatedAtDesc(Pageable pageable);
@@ -45,10 +49,10 @@ public interface WorkflowRepository extends JpaRepository<Workflow, Long> {
     Page<Workflow> findTemplatesByCategory(@Param("category") String category, Pageable pageable);
     
     // 获取用户的工作流统计
-    @Query("SELECT COUNT(w) FROM Workflow w WHERE w.userId = :userId")
+    @Query("SELECT COUNT(w) FROM Workflow w WHERE w.user.id = :userId")
     Long countByUserId(@Param("userId") Long userId);
     
-    @Query("SELECT COUNT(w) FROM Workflow w WHERE w.userId = :userId AND w.status = :status")
+    @Query("SELECT COUNT(w) FROM Workflow w WHERE w.user.id = :userId AND w.status = :status")
     Long countByUserIdAndStatus(@Param("userId") Long userId, @Param("status") Workflow.WorkflowStatus status);
     
     // 获取所有分类
@@ -56,11 +60,11 @@ public interface WorkflowRepository extends JpaRepository<Workflow, Long> {
     List<String> findAllCategories();
     
     // 获取用户的所有分类
-    @Query("SELECT DISTINCT w.category FROM Workflow w WHERE w.userId = :userId AND w.category IS NOT NULL ORDER BY w.category")
+    @Query("SELECT DISTINCT w.category FROM Workflow w WHERE w.user.id = :userId AND w.category IS NOT NULL ORDER BY w.category")
     List<String> findCategoriesByUserId(@Param("userId") Long userId);
     
     // 检查工作流名称是否存在
-    boolean existsByUserIdAndNameAndIdNot(Long userId, String name, Long id);
+    boolean existsByUser_IdAndNameAndIdNot(Long userId, String name, Long id);
     
-    boolean existsByUserIdAndName(Long userId, String name);
+    boolean existsByUser_IdAndName(Long userId, String name);
 }

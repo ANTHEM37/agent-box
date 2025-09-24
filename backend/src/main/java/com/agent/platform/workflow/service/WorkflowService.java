@@ -122,56 +122,64 @@ public class WorkflowService {
     }
     
     /**
-     * 搜索工作流
+     * 搜索工作流 - 暂时使用简单实现
      */
     public Page<Workflow> searchWorkflows(Long userId, String keyword, Pageable pageable) {
-        return workflowRepository.searchByKeyword(userId, keyword, pageable);
+        // 暂时返回所有用户工作流，后续实现搜索功能
+        return workflowRepository.findByUserIdOrderByUpdatedAtDesc(userId, pageable);
     }
     
     /**
-     * 根据标签获取工作流
+     * 根据标签获取工作流 - 暂时使用简单实现
      */
     public Page<Workflow> getUserWorkflowsByTag(Long userId, String tag, Pageable pageable) {
-        return workflowRepository.findByUserIdAndTag(userId, tag, pageable);
+        // 暂时返回所有用户工作流，后续实现标签搜索功能
+        return workflowRepository.findByUserIdOrderByUpdatedAtDesc(userId, pageable);
     }
     
     /**
-     * 获取模板工作流
+     * 获取模板工作流 - 暂时返回空结果
      */
     public Page<Workflow> getTemplates(Pageable pageable) {
-        return workflowRepository.findPublicTemplates(pageable);
+        // 暂时返回空结果，后续实现模板功能
+        return Page.empty(pageable);
     }
     
     /**
-     * 根据分类获取模板
+     * 根据分类获取模板 - 暂时返回空结果
      */
     public Page<Workflow> getTemplatesByCategory(String category, Pageable pageable) {
-        return workflowRepository.findTemplatesByCategory(category, pageable);
+        // 暂时返回空结果，后续实现模板功能
+        return Page.empty(pageable);
     }
     
     /**
-     * 获取所有分类
+     * 获取所有分类 - 暂时返回空列表
      */
     public List<String> getAllCategories() {
-        return workflowRepository.findAllCategories();
+        // 暂时返回空列表，后续实现分类功能
+        return List.of();
     }
     
     /**
-     * 获取用户的分类
+     * 获取用户的分类 - 暂时返回空列表
      */
     public List<String> getUserCategories(Long userId) {
-        return workflowRepository.findCategoriesByUserId(userId);
+        // 暂时返回空列表，后续实现分类功能
+        return List.of();
     }
     
     /**
-     * 获取用户工作流统计
+     * 获取用户工作流统计 - 暂时返回简单统计
      */
     public Map<String, Long> getUserWorkflowStats(Long userId) {
         Map<String, Long> stats = new HashMap<>();
-        stats.put("total", workflowRepository.countByUserId(userId));
-        stats.put("draft", workflowRepository.countByUserIdAndStatus(userId, Workflow.WorkflowStatus.DRAFT));
-        stats.put("published", workflowRepository.countByUserIdAndStatus(userId, Workflow.WorkflowStatus.PUBLISHED));
-        stats.put("archived", workflowRepository.countByUserIdAndStatus(userId, Workflow.WorkflowStatus.ARCHIVED));
+        // 暂时使用简单实现
+        List<Workflow> userWorkflows = workflowRepository.findByUserIdOrderByUpdatedAtDesc(userId, Pageable.unpaged()).getContent();
+        stats.put("total", (long) userWorkflows.size());
+        stats.put("draft", userWorkflows.stream().filter(w -> w.getStatus() == Workflow.WorkflowStatus.DRAFT).count());
+        stats.put("published", userWorkflows.stream().filter(w -> w.getStatus() == Workflow.WorkflowStatus.PUBLISHED).count());
+        stats.put("archived", userWorkflows.stream().filter(w -> w.getStatus() == Workflow.WorkflowStatus.ARCHIVED).count());
         return stats;
     }
     

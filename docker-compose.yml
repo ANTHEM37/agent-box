@@ -34,7 +34,7 @@ services:
 
   # Chroma 向量数据库
   chroma:
-    image: chromadb/chroma:latest
+    image: ghcr.io/chroma-core/chroma:0.4.24
     container_name: agent-chroma
     ports:
       - "8000:8000"

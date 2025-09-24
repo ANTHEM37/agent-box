@@ -1,7 +1,9 @@
 package com.agent.platform.config;
 
 import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
+import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.chroma.ChromaEmbeddingStore;
@@ -28,6 +30,22 @@ public class LangChain4jConfig {
 
     @Value("${chroma.port:8000}")
     private int chromaPort;
+
+    /**
+     * OpenAI Chat 模型
+     */
+    @Bean
+    public ChatLanguageModel chatLanguageModel() {
+        return OpenAiChatModel.builder()
+            .apiKey(openaiApiKey)
+            .baseUrl(openaiBaseUrl)
+            .modelName("gpt-3.5-turbo")
+            .temperature(0.7)
+            .maxTokens(2000)
+            .timeout(Duration.ofSeconds(60))
+            .maxRetries(3)
+            .build();
+    }
 
     /**
      * OpenAI Embedding 模型

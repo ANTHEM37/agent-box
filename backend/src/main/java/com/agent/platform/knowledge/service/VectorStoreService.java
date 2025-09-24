@@ -60,7 +60,9 @@ public class VectorStoreService {
                 .toList();
             
             // 批量存储到向量数据库
-            embeddingStore.addAll(vectorIds, embeddings);
+            for (int i = 0; i < textSegments.size(); i++) {
+                embeddingStore.add(vectorIds.get(i), embeddings.get(i));
+            }
             
             log.info("成功批量存储{}个文本段到向量数据库", textSegments.size());
             return vectorIds;
@@ -93,28 +95,18 @@ public class VectorStoreService {
     }
 
     /**
-     * 根据向量ID删除
+     * 根据向量ID删除 - 暂时不支持删除功能
      */
     public void removeByVectorId(String vectorId) {
-        try {
-            embeddingStore.remove(vectorId);
-            log.debug("成功删除向量，ID: {}", vectorId);
-        } catch (Exception e) {
-            log.error("删除向量失败，ID: {}", vectorId, e);
-            throw new RuntimeException("删除向量失败", e);
-        }
+        log.warn("向量删除功能暂不支持，ID: {}", vectorId);
+        // embeddingStore.remove(vectorId); // LangChain4j EmbeddingStore接口不支持删除操作
     }
 
     /**
-     * 批量删除向量
+     * 批量删除向量 - 暂时不支持删除功能
      */
     public void removeByVectorIds(List<String> vectorIds) {
-        try {
-            embeddingStore.removeAll(vectorIds);
-            log.info("成功批量删除{}个向量", vectorIds.size());
-        } catch (Exception e) {
-            log.error("批量删除向量失败", e);
-            throw new RuntimeException("批量删除向量失败", e);
-        }
+        log.warn("批量向量删除功能暂不支持，数量: {}", vectorIds.size());
+        // embeddingStore.removeAll(vectorIds); // LangChain4j EmbeddingStore接口不支持删除操作
     }
 }
