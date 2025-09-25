@@ -20,17 +20,20 @@ public interface MessageRepository extends JpaRepository<Message, Long>, JpaSpec
     /**
      * 根据发送方实例ID查找消息
      */
-    List<Message> findBySenderId(Long senderId);
+    @Query("SELECT m FROM Message m WHERE m.sender.id = :senderId")
+    List<Message> findBySenderId(@Param("senderId") Long senderId);
 
     /**
      * 根据接收方实例ID查找消息
      */
-    List<Message> findByReceiverId(Long receiverId);
+    @Query("SELECT m FROM Message m WHERE m.receiver.id = :receiverId")
+    List<Message> findByReceiverId(@Param("receiverId") Long receiverId);
 
     /**
      * 根据任务ID查找消息
      */
-    List<Message> findByTaskId(Long taskId);
+    @Query("SELECT m FROM Message m WHERE m.task.id = :taskId")
+    List<Message> findByTaskId(@Param("taskId") Long taskId);
 
     /**
      * 根据消息类型查找消息

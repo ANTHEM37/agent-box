@@ -25,7 +25,8 @@ public interface AgentInstanceRepository extends JpaRepository<AgentInstance, Lo
     /**
      * 根据智能体定义ID查找实例
      */
-    List<AgentInstance> findByAgentDefinitionId(Long agentDefinitionId);
+    @Query("SELECT ai FROM AgentInstance ai WHERE ai.agentDefinition.id = :agentDefinitionId")
+    List<AgentInstance> findByAgentDefinitionId(@Param("agentDefinitionId") Long agentDefinitionId);
 
     /**
      * 根据状态查找智能体实例
@@ -45,7 +46,8 @@ public interface AgentInstanceRepository extends JpaRepository<AgentInstance, Lo
     /**
      * 统计指定智能体定义的实例数量
      */
-    long countByAgentDefinitionId(Long agentDefinitionId);
+    @Query("SELECT COUNT(ai) FROM AgentInstance ai WHERE ai.agentDefinition.id = :agentDefinitionId")
+    long countByAgentDefinitionId(@Param("agentDefinitionId") Long agentDefinitionId);
 
     /**
      * 检查会话ID是否存在
@@ -55,7 +57,8 @@ public interface AgentInstanceRepository extends JpaRepository<AgentInstance, Lo
     /**
      * 根据智能体定义ID和状态查找实例
      */
-    List<AgentInstance> findByAgentDefinitionIdAndStatus(Long agentDefinitionId, AgentInstance.InstanceStatus status);
+    @Query("SELECT ai FROM AgentInstance ai WHERE ai.agentDefinition.id = :agentDefinitionId AND ai.status = :status")
+    List<AgentInstance> findByAgentDefinitionIdAndStatus(@Param("agentDefinitionId") Long agentDefinitionId, @Param("status") AgentInstance.InstanceStatus status);
 
     /**
      * 查找需要清理的过期实例

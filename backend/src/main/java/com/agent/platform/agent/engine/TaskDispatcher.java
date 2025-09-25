@@ -27,7 +27,7 @@ public class TaskDispatcher {
     private AgentInstanceService agentInstanceService;
 
     @Autowired
-    private TaskExecutor taskExecutor;
+    private AgentTaskExecutor agentTaskExecutor;
 
     // 任务队列
     private final BlockingQueue<Task> taskQueue = new LinkedBlockingQueue<>();
@@ -144,7 +144,7 @@ public class TaskDispatcher {
             taskService.startTaskExecution(task.getId());
 
             // 提交给任务执行器
-            taskExecutor.executeTask(task, agentInstance);
+            agentTaskExecutor.executeTask(task, agentInstance);
 
             System.out.println("任务已分发给智能体实例: " + task.getId() + " -> " + agentInstance.getId());
 

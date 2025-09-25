@@ -20,7 +20,8 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
     /**
      * 根据智能体实例ID查找任务
      */
-    List<Task> findByAgentInstanceId(Long agentInstanceId);
+    @Query("SELECT t FROM Task t WHERE t.agentInstance.id = :agentInstanceId")
+    List<Task> findByAgentInstanceId(@Param("agentInstanceId") Long agentInstanceId);
 
     /**
      * 根据状态查找任务
@@ -35,7 +36,8 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
     /**
      * 根据智能体实例ID和状态查找任务
      */
-    List<Task> findByAgentInstanceIdAndStatus(Long agentInstanceId, Task.TaskStatus status);
+    @Query("SELECT t FROM Task t WHERE t.agentInstance.id = :agentInstanceId AND t.status = :status")
+    List<Task> findByAgentInstanceIdAndStatus(@Param("agentInstanceId") Long agentInstanceId, @Param("status") Task.TaskStatus status);
 
     /**
      * 根据优先级排序查找待处理任务
@@ -46,7 +48,8 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
     /**
      * 统计指定智能体实例的任务数量
      */
-    long countByAgentInstanceId(Long agentInstanceId);
+    @Query("SELECT COUNT(t) FROM Task t WHERE t.agentInstance.id = :agentInstanceId")
+    long countByAgentInstanceId(@Param("agentInstanceId") Long agentInstanceId);
 
     /**
      * 统计指定状态的任务数量

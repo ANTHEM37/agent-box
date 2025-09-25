@@ -18,7 +18,7 @@ import java.util.concurrent.Future;
  * 任务执行器 - 负责具体任务的执行
  */
 @Component
-public class TaskExecutor {
+public class AgentTaskExecutor {
 
     @Autowired
     private TaskService taskService;
