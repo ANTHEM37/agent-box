@@ -3,13 +3,9 @@ package com.agent.platform.agent.controller;
 import com.agent.platform.agent.entity.Task;
 import com.agent.platform.agent.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,7 +13,7 @@ import java.util.Optional;
  * 任务控制器
  */
 @RestController
-@RequestMapping("/api/tasks")
+@RequestMapping("/tasks")
 @CrossOrigin(origins = "*")
 public class TaskController {
 
@@ -65,30 +61,6 @@ public class TaskController {
     }
 
     /**
-     * 获取待处理任务（按优先级排序）
-     */
-    @GetMapping("/pending")
-    public ResponseEntity<List<Task>> getPendingTasksOrderByPriority() {
-        List<Task> tasks = taskService.getPendingTasksOrderByPriority();
-        return ResponseEntity.ok(tasks);
-    }
-
-    /**
-     * 更新任务状态
-     */
-    @PutMapping("/{id}/status")
-    public ResponseEntity<Task> updateTaskStatus(
-            @PathVariable Long id, 
-            @RequestParam Task.TaskStatus status) {
-        try {
-            Task task = taskService.updateTaskStatus(id, status);
-            return ResponseEntity.ok(task);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    /**
      * 开始执行任务
      */
     @PostMapping("/{id}/start")
@@ -133,79 +105,5 @@ public class TaskController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         }
-    }
-
-    /**
-     * 取消任务
-     */
-    @PostMapping("/{id}/cancel")
-    public ResponseEntity<Task> cancelTask(@PathVariable Long id) {
-        try {
-            Task task = taskService.cancelTask(id);
-            return ResponseEntity.ok(task);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    /**
-     * 重试失败的任务
-     */
-    @PostMapping("/{id}/retry")
-    public ResponseEntity<Task> retryTask(@PathVariable Long id) {
-        try {
-            Task task = taskService.retryTask(id);
-            return ResponseEntity.ok(task);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    /**
-     * 获取子任务
-     */
-    @GetMapping("/{id}/subtasks")
-    public ResponseEntity<List<Task>> getSubTasks(@PathVariable Long id) {
-        List<Task> subTasks = taskService.getSubTasks(id);
-        return ResponseEntity.ok(subTasks);
-    }
-
-    /**
-     * 分页查询任务
-     */
-    @GetMapping("/page")
-    public ResponseEntity<Page<Task>> getTasks(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Task> tasks = taskService.getTasks(pageable);
-        return ResponseEntity.ok(tasks);
-    }
-
-    /**
-     * 处理超时任务
-     */
-    @PostMapping("/handle-timeout")
-    public ResponseEntity<Integer> handleTimeoutTasks(@RequestParam String timeoutTime) {
-        try {
-            LocalDateTime timeoutDateTime = LocalDateTime.parse(timeoutTime);
-            int handledCount = taskService.handleTimeoutTasks(timeoutDateTime);
-            return ResponseEntity.ok(handledCount);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    /**
-     * 获取任务统计信息
-     */
-    @GetMapping("/stats")
-    public ResponseEntity<TaskService.TaskStats> getTaskStats() {
-        TaskService.TaskStats stats = taskService.getTaskStats();
-        return ResponseEntity.ok(stats);
     }
 }

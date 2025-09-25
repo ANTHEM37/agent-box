@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @Tag(name = "文档管理", description = "文档的上传、处理、查询和删除")
 @RestController
-@RequestMapping("/api/knowledge-bases/{knowledgeBaseId}/documents")
+@RequestMapping("/knowledge-bases/{knowledgeBaseId}/documents")
 @RequiredArgsConstructor
 public class DocumentController {
 

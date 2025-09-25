@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
  * 部署控制器
  */
 @RestController
-@RequestMapping("/api/mcp/deployments")
+@RequestMapping("/mcp/deployments")
 @RequiredArgsConstructor
 public class DeploymentController {
 

@@ -20,7 +20,7 @@ import java.util.List;
  */
 @Tag(name = "知识库搜索", description = "语义搜索和RAG相关功能")
 @RestController
-@RequestMapping("/api/search")
+@RequestMapping("/search")
 @RequiredArgsConstructor
 public class SearchController {
 

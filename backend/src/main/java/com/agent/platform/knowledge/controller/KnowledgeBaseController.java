@@ -1,14 +1,18 @@
 package com.agent.platform.knowledge.controller;
 
 import com.agent.platform.common.base.ApiResponse;
+import com.agent.platform.common.exception.BusinessException;
 import com.agent.platform.knowledge.dto.KnowledgeBaseCreateRequest;
 import com.agent.platform.knowledge.dto.KnowledgeBaseResponse;
+import com.agent.platform.knowledge.entity.KnowledgeBase;
 import com.agent.platform.knowledge.service.KnowledgeBaseService;
+import com.agent.platform.user.entity.User;
 import com.agent.platform.security.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -19,12 +23,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 知识库控制器
+ * 知识库管理控制器
  */
 @Tag(name = "知识库管理", description = "知识库的创建、查询、更新和删除")
 @RestController
-@RequestMapping("/api/knowledge-bases")
+@RequestMapping("/knowledge-bases")
 @RequiredArgsConstructor
+@Slf4j
 public class KnowledgeBaseController {
 
     private final KnowledgeBaseService knowledgeBaseService;

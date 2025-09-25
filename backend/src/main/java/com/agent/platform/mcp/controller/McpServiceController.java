@@ -19,7 +19,7 @@ import java.util.List;
  * MCP 服务控制器
  */
 @RestController
-@RequestMapping("/api/mcp/services")
+@RequestMapping("/mcp/services")
 @RequiredArgsConstructor
 public class McpServiceController {
 

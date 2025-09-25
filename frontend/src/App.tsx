@@ -1,6 +1,7 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './stores/auth'
+import { useAuthInit } from './hooks/useAuthInit'
 import MainLayout from './components/common/Layout/MainLayout'
 import Login from './pages/auth/Login'
 import Register from './pages/auth/Register'
@@ -16,6 +17,12 @@ import MessageList from './pages/agent/MessageList'
 
 function App() {
   const { isAuthenticated } = useAuthStore()
+  const { isInitialized } = useAuthInit()
+
+  // 等待认证状态初始化完成
+  if (!isInitialized) {
+    return <div>Loading...</div>
+  }
 
   return (
     <Router>
@@ -31,17 +38,20 @@ function App() {
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="knowledge" element={<KnowledgeBaseList />} />
-          <Route path="knowledge/:knowledgeBaseId/documents" element={<DocumentManagement />} />
+          <Route path="knowledge/:id/documents" element={<DocumentManagement />} />
           <Route path="search" element={<SearchInterface />} />
-          <Route path="agent" element={<AgentDashboard />} />
-          <Route path="agent/definitions" element={<AgentDefinitionList />} />
-          <Route path="agent/instances" element={<AgentInstanceList />} />
-          <Route path="agent/tasks" element={<TaskList />} />
-          <Route path="agent/messages" element={<MessageList />} />
+          <Route path="agents" element={<AgentDashboard />} />
+          <Route path="agents/definitions" element={<AgentDefinitionList />} />
+          <Route path="agents/instances" element={<AgentInstanceList />} />
+          <Route path="agents/tasks" element={<TaskList />} />
+          <Route path="agents/messages" element={<MessageList />} />
+          
+          {/* MCP 路由 */}
+          <Route path="mcp" element={<Navigate to="/mcp/services" replace />} />
+          
+          {/* 工作流路由 */}
+          <Route path="workflows" element={<Navigate to="/workflows/list" replace />} />
         </Route>
-        
-        {/* 404 重定向 */}
-        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   )
