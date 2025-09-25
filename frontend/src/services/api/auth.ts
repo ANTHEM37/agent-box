@@ -1,21 +1,43 @@
-import apiClient from '../http/client';
-import { ApiResponse, AuthResponse } from '../../types/common';
-import { LoginRequest, RegisterRequest } from '../../types/auth';
+import http from '../http/client'
 
-// 用户登录
-export const login = async (data: LoginRequest): Promise<ApiResponse<AuthResponse>> => {
-  const response = await apiClient.post<ApiResponse<AuthResponse>>('/auth/login', data);
-  return response.data;
-};
+export interface LoginRequest {
+  username: string
+  password: string
+}
 
-// 用户注册
-export const register = async (data: RegisterRequest): Promise<ApiResponse<AuthResponse>> => {
-  const response = await apiClient.post<ApiResponse<AuthResponse>>('/auth/register', data);
-  return response.data;
-};
+export interface RegisterRequest {
+  username: string
+  email: string
+  password: string
+}
 
-// 获取当前用户信息
-export const getCurrentUser = async (): Promise<ApiResponse<AuthResponse>> => {
-  const response = await apiClient.get<ApiResponse<AuthResponse>>('/auth/me');
-  return response.data;
-};
+export interface AuthResponse {
+  token: string
+}
+
+export interface MeResponse {
+  id: number
+  username: string
+  email: string
+  fullName?: string
+}
+
+type ApiResponse<T> = { code: number; message: string; data: T }
+
+export const authApi = {
+  async login(payload: LoginRequest): Promise<AuthResponse> {
+    const resp = await http.post<ApiResponse<AuthResponse>>('/auth/login', payload)
+    return resp.data.data
+  },
+
+  async register(payload: RegisterRequest): Promise<void> {
+    await http.post<ApiResponse<AuthResponse>>('/auth/register', payload)
+  },
+
+  async me(): Promise<MeResponse> {
+    const resp = await http.get<ApiResponse<MeResponse>>('/auth/me')
+    return resp.data.data
+  },
+}
+
+

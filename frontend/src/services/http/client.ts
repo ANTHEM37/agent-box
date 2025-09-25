@@ -1,57 +1,51 @@
-import axios, { 
-  AxiosInstance, 
-  AxiosRequestConfig, 
-  AxiosResponse,
-  InternalAxiosRequestConfig,
-  AxiosRequestHeaders
-} from 'axios';
-import { createStandaloneNavigation } from '@utils/navigation';
+import axios from 'axios'
 
-// 创建axios实例
-const apiClient: AxiosInstance = axios.create({
-  baseURL: '/api',
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+function resolveApiBase(): string {
+  const envUrl = import.meta.env.VITE_API_BASE_URL as string | undefined
+  if (envUrl) return envUrl
+  // Fallbacks to avoid localhost DNS issues
+  const protocol = typeof window !== 'undefined' ? window.location.protocol : 'http:'
+  const host = typeof window !== 'undefined' ? window.location.hostname : '127.0.0.1'
+  const baseHost = host || '127.0.0.1'
+  return `${protocol}//${baseHost}:8080/api`
+}
 
-// 请求拦截器
-apiClient.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    // 处理重复的/api路径
-    if (config.url?.startsWith('/api')) {
-      config.url = config.url.replace(/^\/api/, '');
-    }
-    
-    // 添加认证token
-    const token = localStorage.getItem('accessToken');
+const apiBaseUrl = resolveApiBase()
+
+export const httpClient = axios.create({
+  baseURL: apiBaseUrl,
+  timeout: 15000,
+})
+
+httpClient.interceptors.request.use((config) => {
+  try {
+    const token = localStorage.getItem('token')
     if (token) {
-      config.headers = config.headers || {} as AxiosRequestHeaders;
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers = config.headers || {}
+      config.headers.Authorization = `Bearer ${token}`
     }
-    return config;
-  },
-  (error: any) => {
-    return Promise.reject(error);
+  } catch (_) {
+    // ignore storage errors
   }
-);
+  return config
+})
 
-// 响应拦截器
-apiClient.interceptors.response.use(
-  (response: AxiosResponse) => {
-    return response;
-  },
-  (error: any) => {
-    if (error.response?.status === 401) {
-      // token过期或无效，清除本地存储并跳转到登录页
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('user');
-      const { navigate } = createStandaloneNavigation();
-      navigate('/login');
+httpClient.interceptors.response.use(
+  (resp) => resp,
+  (error) => {
+    if (error?.response?.status === 401) {
+      try {
+        localStorage.removeItem('token')
+      } catch (_) {}
+      // best-effort redirect to login if not already there
+      if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+        window.location.href = '/login'
+      }
     }
-    return Promise.reject(error);
+    return Promise.reject(error)
   }
-);
+)
 
-export default apiClient;
+export default httpClient
+
+

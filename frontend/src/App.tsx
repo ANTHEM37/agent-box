@@ -1,61 +1,116 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import { Layout } from 'antd';
-import Header from '@components/layout/Header';
-import Sidebar from '@components/layout/Sidebar';
-import AuthLayout from '@components/layout/AuthLayout';
-import Dashboard from '@pages/Dashboard';
-import LoginPage from '@pages/LoginPage';
-import Register from '@pages/auth/Register';
-import KnowledgeBaseList from '@pages/knowledge/KnowledgeBaseList';
-import WorkflowList from '@pages/workflow/WorkflowList';
-import McpServiceList from '@pages/mcp/McpServiceList';
-import AgentList from '@pages/agent/AgentList';
-import './App.css';
+import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom'
+import { ReactFlowProvider } from 'reactflow'
+import AppLayout from './components/layout/AppLayout'
+import Dashboard from './pages/Dashboard'
+import KnowledgeBaseList from './pages/knowledge/KnowledgeBaseList'
+import WorkflowList from './pages/workflow/WorkflowList'
+import WorkflowExecutionList from './pages/workflow/WorkflowExecutionList'
+import McpServiceList from './pages/mcp/McpServiceList'
+import LoginPage from './pages/auth/Login'
+import RegisterPage from './pages/auth/Register'
+// 添加工作流设计器导入
+import WorkflowDesigner from './pages/workflow/WorkflowDesigner'
+import { useAuthStore } from './stores/authStore'
 
-const { Content, Footer } = Layout;
+function PrivateRoute({ children }: { children: React.ReactNode }) {
+  const token = useAuthStore((s) => s.token)
+  if (!token) {
+    return <Navigate to="/login" replace />
+  }
+  return children
+}
 
-const MainLayout: React.FC = () => {
+// 创建一个包装组件来包含 ReactFlowProvider
+function ReactFlowWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Sidebar />
-      <Layout>
-        <Header />
-        <Content style={{ margin: '24px 16px 0' }}>
-          <div style={{ padding: 24, minHeight: 360 }}>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/knowledge" element={<KnowledgeBaseList />} />
-              <Route path="/workflows" element={<WorkflowList />} />
-              <Route path="/mcp" element={<McpServiceList />} />
-              <Route path="/agents" element={<AgentList />} />
-            </Routes>
-          </div>
-        </Content>
-        <Footer style={{ textAlign: 'center' }}>
-          AI Agent Platform ©{new Date().getFullYear()} Created by Agent Platform Team
-        </Footer>
-      </Layout>
-    </Layout>
-  );
-};
+    <ReactFlowProvider>
+      {children}
+    </ReactFlowProvider>
+  )
+}
 
-const App: React.FC = () => {
+export default function App() {
   return (
-    <Routes>
-      <Route path="/login" element={
-        <AuthLayout>
-          <LoginPage />
-        </AuthLayout>
-      } />
-      <Route path="/register" element={
-        <AuthLayout>
-          <Register />
-        </AuthLayout>
-      } />
-      <Route path="/*" element={<MainLayout />} />
-    </Routes>
-  );
-};
-
-export default App;
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route
+          path="/"
+          element={
+            <PrivateRoute>
+              <AppLayout>
+                <Dashboard />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/knowledge"
+          element={
+            <PrivateRoute>
+              <AppLayout>
+                <KnowledgeBaseList />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/workflows"
+          element={
+            <PrivateRoute>
+              <AppLayout>
+                <WorkflowList />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        {/* 添加工作流设计器路由 */}
+        <Route
+          path="/workflow/create"
+          element={
+            <PrivateRoute>
+              <AppLayout>
+                <ReactFlowWrapper>
+                  <WorkflowDesigner />
+                </ReactFlowWrapper>
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/workflow/edit/:id"
+          element={
+            <PrivateRoute>
+              <AppLayout>
+                <ReactFlowWrapper>
+                  <WorkflowDesigner />
+                </ReactFlowWrapper>
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/workflow/executions"
+          element={
+            <PrivateRoute>
+              <AppLayout>
+                <WorkflowExecutionList />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/mcp"
+          element={
+            <PrivateRoute>
+              <AppLayout>
+                <McpServiceList />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
+  )
+}

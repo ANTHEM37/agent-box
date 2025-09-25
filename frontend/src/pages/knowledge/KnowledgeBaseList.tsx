@@ -1,239 +1,147 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { 
-  Table, 
-  Button, 
-  Card, 
-  Typography, 
-  Space, 
-  Tag, 
-  message,
-  Modal,
-  Form,
-  Input,
-  InputNumber
-} from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
-import { 
-  getKnowledgeBases, 
-  createKnowledgeBase, 
-  deleteKnowledgeBase 
-} from '../../services/api/knowledge';
-import { KnowledgeBaseResponse, KnowledgeBaseCreateRequest } from '../../types/knowledge';
-import { formatDateTime } from '../../utils/format';
+import { useEffect, useState } from 'react'
+import { Button, Flex, Input, Space, Table, Typography, message, Popconfirm, Switch, Drawer, Descriptions } from 'antd'
+import { knowledgeApi, type KnowledgeBaseResponse } from '../../services/api/knowledge'
+import KnowledgeBaseModal from './KnowledgeBaseModal'
+import DocumentManagement from './DocumentManagement'
+import SearchInterface from './SearchInterface'
 
-const { Title } = Typography;
-const { confirm } = Modal;
+export default function KnowledgeBaseList() {
+  const [data, setData] = useState<KnowledgeBaseResponse[]>([])
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(false)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [keyword, setKeyword] = useState('')
+  const [modalOpen, setModalOpen] = useState(false)
+  const [editing, setEditing] = useState<KnowledgeBaseResponse | null>(null)
+  const [onlyActive, setOnlyActive] = useState(false)
+  const [detail, setDetail] = useState<KnowledgeBaseResponse | null>(null)
 
-const KnowledgeBaseList: React.FC = () => {
-  const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBaseResponse[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [createModalVisible, setCreateModalVisible] = useState(false);
-  const [createForm] = Form.useForm();
-  const navigate = useNavigate();
-
-  const fetchKnowledgeBases = async () => {
-    setLoading(true);
+  const load = async (p = page, s = pageSize) => {
+    setLoading(true)
     try {
-      const response = await getKnowledgeBases();
-      if (response.code === 200) {
-        setKnowledgeBases(response.data.content);
+      if (onlyActive) {
+        const list = await knowledgeApi.active()
+        setData(list)
+        setTotal(list.length)
+      } else if (keyword.trim()) {
+        const list = await knowledgeApi.search(keyword.trim())
+        setData(list)
+        setTotal(list.length)
       } else {
-        message.error(response.message || '获取知识库列表失败');
+        const pageResp = await knowledgeApi.list(p - 1, s)
+        setData(pageResp.content)
+        setTotal(pageResp.totalElements)
       }
-    } catch (error) {
-      message.error('获取知识库列表失败');
+    } catch (e: any) {
+      message.error(e?.response?.data?.message || '加载失败')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
-    fetchKnowledgeBases();
-  }, []);
-
-  const handleCreate = async (values: KnowledgeBaseCreateRequest) => {
-    try {
-      const response = await createKnowledgeBase(values);
-      if (response.code === 200) {
-        message.success('创建知识库成功');
-        setCreateModalVisible(false);
-        createForm.resetFields();
-        fetchKnowledgeBases();
-      } else {
-        message.error(response.message || '创建知识库失败');
-      }
-    } catch (error) {
-      message.error('创建知识库失败');
-    }
-  };
-
-  const handleDelete = (id: number, name: string) => {
-    confirm({
-      title: '确认删除',
-      content: `确定要删除知识库 "${name}" 吗？此操作不可恢复。`,
-      onOk: async () => {
-        try {
-          const response = await deleteKnowledgeBase(id);
-          if (response.code === 200) {
-            message.success('删除知识库成功');
-            fetchKnowledgeBases();
-          } else {
-            message.error(response.message || '删除知识库失败');
-          }
-        } catch (error) {
-          message.error('删除知识库失败');
-        }
-      },
-    });
-  };
-
-  const columns = [
-    {
-      title: '名称',
-      dataIndex: 'name',
-      key: 'name',
-    },
-    {
-      title: '描述',
-      dataIndex: 'description',
-      key: 'description',
-      render: (text: string) => text || '-',
-    },
-    {
-      title: '状态',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: string) => (
-        <Tag color={status === 'ACTIVE' ? 'green' : status === 'INACTIVE' ? 'orange' : 'red'}>
-          {status}
-        </Tag>
-      ),
-    },
-    {
-      title: '文档数量',
-      dataIndex: 'documentCount',
-      key: 'documentCount',
-      render: (count: number) => count || 0,
-    },
-    {
-      title: '创建时间',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      render: (date: string) => formatDateTime(date),
-    },
-    {
-      title: '操作',
-      key: 'action',
-      render: (_: any, record: KnowledgeBaseResponse) => (
-        <Space size="middle">
-          <Button 
-            type="primary" 
-            icon={<EyeOutlined />} 
-            size="small"
-            onClick={() => navigate(`/knowledge/${record.id}`)}
-          >
-            查看
-          </Button>
-          <Button 
-            icon={<EditOutlined />} 
-            size="small"
-            onClick={() => navigate(`/knowledge/${record.id}/edit`)}
-          >
-            编辑
-          </Button>
-          <Button 
-            danger 
-            icon={<DeleteOutlined />} 
-            size="small"
-            onClick={() => handleDelete(record.id, record.name)}
-          >
-            删除
-          </Button>
-        </Space>
-      ),
-    },
-  ];
+    load(1, pageSize)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
-    <div className="page-container">
-      <div className="page-header">
-        <Title level={2}>知识库管理</Title>
-        <Button 
-          type="primary" 
-          icon={<PlusOutlined />}
-          onClick={() => setCreateModalVisible(true)}
-        >
-          创建知识库
-        </Button>
-      </div>
+    <div>
+      <Flex align="center" justify="space-between" style={{ marginBottom: 12 }}>
+        <Typography.Title level={4} style={{ margin: 0 }}>知识库列表</Typography.Title>
+        <Space>
+          <span>仅活跃</span>
+          <Switch checked={onlyActive} onChange={(v) => { setOnlyActive(v); load(1, pageSize) }} />
+          <Input.Search
+            allowClear
+            placeholder="搜索名称..."
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            onSearch={() => load(1, pageSize)}
+          />
+          <Button type="primary" onClick={() => { setEditing(null); setModalOpen(true) }}>新建</Button>
+        </Space>
+      </Flex>
 
-      <Card>
-        <Table
-          loading={loading}
-          dataSource={knowledgeBases}
-          columns={columns}
-          rowKey="id"
-          pagination={false}
-        />
-      </Card>
-
-      <Modal
-        title="创建知识库"
-        open={createModalVisible}
-        onCancel={() => {
-          setCreateModalVisible(false);
-          createForm.resetFields();
+      <Table
+        rowKey="id"
+        loading={loading}
+        dataSource={data}
+        pagination={{
+          current: page,
+          pageSize,
+          total,
+          onChange: (cp, ps) => {
+            setPage(cp)
+            setPageSize(ps)
+            load(cp, ps)
+          },
         }}
-        onOk={() => createForm.submit()}
-      >
-        <Form
-          form={createForm}
-          layout="vertical"
-          onFinish={handleCreate}
-        >
-          <Form.Item
-            name="name"
-            label="名称"
-            rules={[{ required: true, message: '请输入知识库名称' }]}
-          >
-            <Input placeholder="请输入知识库名称" />
-          </Form.Item>
-          
-          <Form.Item
-            name="description"
-            label="描述"
-          >
-            <Input.TextArea placeholder="请输入知识库描述" rows={3} />
-          </Form.Item>
-          
-          <Form.Item
-            name="embeddingModel"
-            label="嵌入模型"
-            initialValue="text-embedding-ada-002"
-          >
-            <Input placeholder="请输入嵌入模型" />
-          </Form.Item>
-          
-          <Form.Item
-            name="chunkSize"
-            label="分块大小"
-            initialValue={500}
-          >
-            <InputNumber min={100} max={2000} style={{ width: '100%' }} />
-          </Form.Item>
-          
-          <Form.Item
-            name="chunkOverlap"
-            label="重叠大小"
-            initialValue={50}
-          >
-            <InputNumber min={0} max={500} style={{ width: '100%' }} />
-          </Form.Item>
-        </Form>
-      </Modal>
-    </div>
-  );
-};
+        columns={[
+          { title: 'ID', dataIndex: 'id', width: 80 },
+          { title: '名称', dataIndex: 'name' },
+          { title: '描述', dataIndex: 'description' },
+          { title: '创建时间', dataIndex: 'createdAt' },
+          {
+            title: '操作',
+            width: 180,
+            render: (_, row) => (
+              <Space>
+                <Button size="small" onClick={async () => {
+                  try { const d = await knowledgeApi.get(row.id); setDetail(d) } catch (e: any) { message.error('获取详情失败') }
+                }}>查看</Button>
+                <Button size="small" onClick={() => { setEditing(row); setModalOpen(true) }}>编辑</Button>
+                <Popconfirm title="确认删除该知识库？" onConfirm={async () => {
+                  try { await knowledgeApi.remove(row.id); message.success('已删除'); load(page, pageSize) } catch (e: any) { message.error(e?.response?.data?.message || '删除失败') }
+                }}>
+                  <Button size="small" danger>删除</Button>
+                </Popconfirm>
+              </Space>
+            )
+          }
+        ]}
+      />
 
-export default KnowledgeBaseList;
+      <KnowledgeBaseModal
+        open={modalOpen}
+        initialValues={editing ? { name: editing.name, description: editing.description } : undefined}
+        onCancel={() => setModalOpen(false)}
+        onOk={async (values) => {
+          try {
+            if (editing) {
+              await knowledgeApi.update(editing.id, values)
+              message.success('已更新')
+            } else {
+              await knowledgeApi.create(values)
+              message.success('已创建')
+            }
+            setModalOpen(false)
+            load(page, pageSize)
+          } catch (e: any) {
+            message.error(e?.response?.data?.message || '操作失败')
+          }
+        }}
+      />
+
+      <Drawer open={!!detail} width={920} onClose={() => setDetail(null)} title="知识库详情">
+        {detail && (
+          <div>
+            <Descriptions column={2} size="small" bordered>
+              <Descriptions.Item label="ID">{detail.id}</Descriptions.Item>
+              <Descriptions.Item label="名称">{detail.name}</Descriptions.Item>
+              <Descriptions.Item label="描述" span={2}>{detail.description || '-'}</Descriptions.Item>
+              <Descriptions.Item label="创建时间">{detail.createdAt || '-'}</Descriptions.Item>
+            </Descriptions>
+
+            <div style={{ height: 12 }} />
+            <DocumentManagement knowledgeBaseId={detail.id} />
+            <div style={{ height: 12 }} />
+            <SearchInterface knowledgeBaseId={detail.id} />
+          </div>
+        )}
+      </Drawer>
+    </div>
+  )
+}
+
+
