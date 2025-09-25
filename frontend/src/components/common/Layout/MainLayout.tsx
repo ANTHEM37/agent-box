@@ -4,6 +4,7 @@ import {
   DashboardOutlined, 
   DatabaseOutlined, 
   SearchOutlined,
+  RobotOutlined,
   UserOutlined,
   LogoutOutlined,
   SettingOutlined
@@ -23,6 +24,33 @@ export default function MainLayout() {
       key: '/dashboard',
       icon: <DashboardOutlined />,
       label: '仪表板'
+    },
+    {
+      key: '/agent',
+      icon: <RobotOutlined />,
+      label: '智能体管理',
+      children: [
+        {
+          key: '/agent',
+          label: '智能体仪表板'
+        },
+        {
+          key: '/agent/definitions',
+          label: '智能体定义'
+        },
+        {
+          key: '/agent/instances',
+          label: '智能体实例'
+        },
+        {
+          key: '/agent/tasks',
+          label: '任务管理'
+        },
+        {
+          key: '/agent/messages',
+          label: '消息管理'
+        }
+      ]
     },
     {
       key: '/knowledge',

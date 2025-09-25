@@ -44,7 +44,7 @@ class HttpClient {
         const { data } = response
         
         if (data.code === 200) {
-          return data
+          return response
         } else {
           message.error(data.message || '请求失败')
           return Promise.reject(new Error(data.message))

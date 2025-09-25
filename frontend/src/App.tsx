@@ -8,6 +8,11 @@ import Dashboard from './pages/dashboard/Dashboard'
 import KnowledgeBaseList from './pages/knowledge/KnowledgeBaseList'
 import DocumentManagement from './pages/knowledge/DocumentManagement'
 import SearchInterface from './pages/knowledge/SearchInterface'
+import AgentDashboard from './pages/agent/AgentDashboard'
+import AgentDefinitionList from './pages/agent/AgentDefinitionList'
+import AgentInstanceList from './pages/agent/AgentInstanceList'
+import TaskList from './pages/agent/TaskList'
+import MessageList from './pages/agent/MessageList'
 
 function App() {
   const { isAuthenticated } = useAuthStore()
@@ -28,6 +33,11 @@ function App() {
           <Route path="knowledge" element={<KnowledgeBaseList />} />
           <Route path="knowledge/:knowledgeBaseId/documents" element={<DocumentManagement />} />
           <Route path="search" element={<SearchInterface />} />
+          <Route path="agent" element={<AgentDashboard />} />
+          <Route path="agent/definitions" element={<AgentDefinitionList />} />
+          <Route path="agent/instances" element={<AgentInstanceList />} />
+          <Route path="agent/tasks" element={<TaskList />} />
+          <Route path="agent/messages" element={<MessageList />} />
         </Route>
         
         {/* 404 重定向 */}
