@@ -1,4 +1,11 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { 
+  AxiosInstance, 
+  AxiosRequestConfig, 
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+  AxiosRequestHeaders
+} from 'axios';
+import { createStandaloneNavigation } from '@utils/navigation';
 
 // 创建axios实例
 const apiClient: AxiosInstance = axios.create({
@@ -11,10 +18,16 @@ const apiClient: AxiosInstance = axios.create({
 
 // 请求拦截器
 apiClient.interceptors.request.use(
-  (config: AxiosRequestConfig) => {
+  (config: InternalAxiosRequestConfig) => {
+    // 处理重复的/api路径
+    if (config.url?.startsWith('/api')) {
+      config.url = config.url.replace(/^\/api/, '');
+    }
+    
     // 添加认证token
     const token = localStorage.getItem('accessToken');
-    if (token && config.headers) {
+    if (token) {
+      config.headers = config.headers || {} as AxiosRequestHeaders;
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -34,7 +47,8 @@ apiClient.interceptors.response.use(
       // token过期或无效，清除本地存储并跳转到登录页
       localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      const { navigate } = createStandaloneNavigation();
+      navigate('/login');
     }
     return Promise.reject(error);
   }

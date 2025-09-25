@@ -60,6 +60,14 @@ const LoginPage: React.FC = () => {
             </Button>
           </Form.Item>
         </Form>
+        <div style={{ textAlign: 'center', marginTop: 16 }}>
+          <Button 
+            type="link" 
+            onClick={() => navigate('/register')}
+          >
+            没有账号？立即注册
+          </Button>
+        </div>
       </Card>
     </div>
   );

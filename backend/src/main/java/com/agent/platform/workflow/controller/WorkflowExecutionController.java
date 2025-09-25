@@ -19,7 +19,7 @@ import jakarta.validation.Valid;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/workflow-executions")
+@RequestMapping("/workflow-executions")
 @RequiredArgsConstructor
 public class WorkflowExecutionController {
     

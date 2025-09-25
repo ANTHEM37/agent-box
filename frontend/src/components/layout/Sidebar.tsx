@@ -1,4 +1,5 @@
 import React from 'react';
+import useAuthStore from '@stores/authStore';
 import { Layout, Menu } from 'antd';
 import {
   DashboardOutlined,
@@ -18,6 +19,11 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAuthenticated } = useAuthStore();
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const menuItems = [
     {

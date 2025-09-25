@@ -18,7 +18,7 @@ const AppHeader: React.FC<HeaderProps> = ({ collapsed, onCollapse }) => {
   const handleMenuClick = ({ key }: { key: string }) => {
     if (key === 'logout') {
       logout();
-      navigate('/login');
+      window.location.href = '/login'; // 强制刷新以清除所有状态
     } else {
       navigate(`/${key}`);
     }
@@ -40,7 +40,13 @@ const AppHeader: React.FC<HeaderProps> = ({ collapsed, onCollapse }) => {
   ];
 
   return (
-    <Header style={{ padding: 0, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <Header style={{ 
+      padding: '0 24px 0 0', 
+      background: '#fff', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'space-between' 
+    }}>
       <Button
         type="text"
         icon={<MenuOutlined />}
@@ -48,7 +54,7 @@ const AppHeader: React.FC<HeaderProps> = ({ collapsed, onCollapse }) => {
         style={{ fontSize: '16px', width: 64, height: 64 }}
       />
       
-      <div>
+      <div style={{ marginRight: 16 }}>
         <Dropdown
           menu={{ items: menuItems, onClick: handleMenuClick }}
           placement="bottomRight"
